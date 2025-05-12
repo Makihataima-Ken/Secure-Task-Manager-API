@@ -16,7 +16,7 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/public/**").permitAll() // public endpoints
+                .requestMatchers("/", "/public/**","/h2-console/**").permitAll() // public endpoints
                 .anyRequest().authenticated() 
             )
             .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
