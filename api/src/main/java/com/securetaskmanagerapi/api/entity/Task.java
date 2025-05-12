@@ -29,6 +29,7 @@ public class Task {
     private LocalDate dueDate;
 
     @NotBlank
+    @Column(name = "owner_id")
     private String ownerId; // This will be the Keycloak user ID
 }
 

@@ -1,14 +1,24 @@
 package com.securetaskmanagerapi.api.controller;
 
+import com.securetaskmanagerapi.api.dto.CreateTaskDTO;
+import com.securetaskmanagerapi.api.dto.TaskResponseDTO;
+import com.securetaskmanagerapi.api.dto.UpdateTaskDTO;
 import com.securetaskmanagerapi.api.entity.Task;
 import com.securetaskmanagerapi.api.service.TaskService;
+
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
+
+import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
+import org.springframework.http.HttpHeaders;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/tasks")
@@ -21,33 +31,40 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<Task> createTask(@RequestBody Task task, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<TaskResponseDTO> createTask(
+            @RequestBody @Valid CreateTaskDTO taskDTO,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
         String ownerId = jwt.getSubject();
-        Task createdTask = taskService.createTask(task, ownerId);
-        return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
+        TaskResponseDTO createdTask = taskService.createTask(taskDTO, ownerId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdTask);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> getTaskById(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<TaskResponseDTO> getTaskById(@PathVariable Long id, @AuthenticationPrincipal Jwt jwt) {
         String ownerId = jwt.getSubject();
-        Task task = taskService.getTaskById(id, ownerId);
+        TaskResponseDTO task = taskService.getTaskById(id, ownerId);
         return ResponseEntity.ok(task);
     }
 
     @GetMapping
-    public ResponseEntity<List<Task>> getAllTasks(@AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<List<TaskResponseDTO>> getAllTasks(@AuthenticationPrincipal Jwt jwt) {
         String ownerId = jwt.getSubject();
         List<Task> tasks = taskService.getAllTasks(ownerId);
-        return ResponseEntity.ok(tasks);
+        List<TaskResponseDTO> taskDTOs = tasks.stream()
+                .map(TaskResponseDTO::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(taskDTOs);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Task> updateTask(
-            @PathVariable Long id, 
-            @RequestBody Task taskDetails, 
-            @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<TaskResponseDTO> updateTask(
+            @PathVariable Long id,
+            @RequestBody UpdateTaskDTO taskDTO,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
         String ownerId = jwt.getSubject();
-        Task updatedTask = taskService.updateTask(id, taskDetails, ownerId);
+        TaskResponseDTO updatedTask = taskService.updateTask(id, taskDTO, ownerId);
         return ResponseEntity.ok(updatedTask);
     }
 
