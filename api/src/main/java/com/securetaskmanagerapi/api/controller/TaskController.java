@@ -6,17 +6,14 @@ import com.securetaskmanagerapi.api.dto.UpdateTaskDTO;
 import com.securetaskmanagerapi.api.entity.Task;
 import com.securetaskmanagerapi.api.service.TaskService;
 
-import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 
-import org.springframework.http.MediaType;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.http.HttpHeaders;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,7 +57,7 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<TaskResponseDTO> updateTask(
             @PathVariable Long id,
-            @RequestBody UpdateTaskDTO taskDTO,
+            @RequestBody @Valid UpdateTaskDTO taskDTO,
             @AuthenticationPrincipal Jwt jwt
     ) {
         String ownerId = jwt.getSubject();
