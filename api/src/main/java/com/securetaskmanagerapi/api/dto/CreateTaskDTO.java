@@ -6,8 +6,10 @@ import com.securetaskmanagerapi.api.entity.Status;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder.Default;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -25,5 +27,6 @@ public class CreateTaskDTO {
     @FutureOrPresent(message = "Due date must be in the present or future")
     private LocalDate dueDate;
 
-    private Status status;
+    @NotNull
+    private Status status = Status.PENDING;
 }
