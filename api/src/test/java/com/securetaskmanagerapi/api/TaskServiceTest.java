@@ -99,4 +99,158 @@ class TaskServiceTest {
     }
 
     //---------------------------------------------------
+
+    // get task by Id
+    //---------------------------------------------------
+    @Test
+    void getTaskById_ShouldReturnTask_WhenExistsAndOwnerMatches() {
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        
+        TaskResponseDTO result = taskService.getTaskById(1L, OWNER_ID);
+        
+        assertNotNull(result);
+        assertEquals(task.getId(), result.getId());
+    }
+
+    @Test
+    void getTaskById_ShouldThrowResourceNotFound_WhenTaskNotExists() {
+        when(taskRepository.findById(1L)).thenReturn(Optional.empty());
+        
+        assertThrows(ResourceNotFoundException.class, () -> 
+            taskService.getTaskById(1L, OWNER_ID));
+    }
+
+    @Test
+    void getTaskById_ShouldThrowUnauthorized_WhenOwnerMismatch() {
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        
+        assertThrows(UnauthorizedAccessException.class, () -> 
+            taskService.getTaskById(1L, OTHER_OWNER_ID));
+    }
+    //-------------------------------------
+
+    // get all task 
+    //-------------------------------------
+    @Test
+    void getAllTasks_ShouldReturnTasksForOwner() {
+        Task task2 = new Task();
+        task2.setOwnerId(OWNER_ID);
+        when(taskRepository.findByOwnerId(OWNER_ID)).thenReturn(List.of(task, task2));
+        
+        List<Task> result = taskService.getAllTasks(OWNER_ID);
+        
+        assertEquals(2, result.size());
+        assertTrue(result.stream().allMatch(t -> t.getOwnerId().equals(OWNER_ID)));
+    }
+
+    @Test
+    void getAllTasks_ShouldReturnEmptyList_WhenNoTasks() {
+        when(taskRepository.findByOwnerId(OWNER_ID)).thenReturn(List.of());
+        
+        List<Task> result = taskService.getAllTasks(OWNER_ID);
+        
+        assertTrue(result.isEmpty());
+    }
+
+    //-----------------------------------
+
+    // update task test
+    //------------------------------------
+    @Test
+    void updateTask_ShouldUpdateFields_WhenValid() {
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        when(taskRepository.save(any(Task.class))).thenReturn(task);
+        
+        TaskResponseDTO result = taskService.updateTask(1L, updateTaskDTO, OWNER_ID);
+        
+        assertEquals(updateTaskDTO.getTitle(), result.getTitle());
+        assertEquals(updateTaskDTO.getDescription(), result.getDescription());
+        assertEquals(updateTaskDTO.getStatus(), result.getStatus());
+        assertEquals(updateTaskDTO.getDueDate(), result.getDueDate());
+    }
+
+    @Test
+    void updateTask_ShouldThrowUnauthorized_WhenOwnerMismatch() {
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        
+        assertThrows(UnauthorizedAccessException.class, () -> 
+            taskService.updateTask(1L, updateTaskDTO, OTHER_OWNER_ID));
+    }
+
+    @Test
+    void updateTask_ShouldNotUpdateNullFields() {
+        updateTaskDTO.setDescription(null);
+        updateTaskDTO.setStatus(null);
+        
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        when(taskRepository.save(any(Task.class))).thenReturn(task);
+        
+        TaskResponseDTO result = taskService.updateTask(1L, updateTaskDTO, OWNER_ID);
+        
+        assertEquals(updateTaskDTO.getTitle(), result.getTitle());
+        assertNotNull(result.getDescription()); // Original value preserved
+        assertNotNull(result.getStatus()); // Original value preserved
+    }
+
+    //------------------------------------
+
+    //delete task test
+    //------------------------------------
+    @Test
+    void deleteTask_ShouldDelete_WhenValid() {
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        
+        taskService.deleteTask(1L, OWNER_ID);
+        
+        verify(taskRepository, times(1)).delete(task);
+    }
+
+    @Test
+    void deleteTask_ShouldThrowUnauthorized_WhenOwnerMismatch() {
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        
+        assertThrows(UnauthorizedAccessException.class, () -> 
+            taskService.deleteTask(1L, OTHER_OWNER_ID));
+    }
+
+    @Test
+    void deleteTask_ShouldThrowResourceNotFound_WhenTaskNotExists() {
+        when(taskRepository.findById(1L)).thenReturn(Optional.empty());
+        
+        assertThrows(ResourceNotFoundException.class, () -> 
+            taskService.deleteTask(1L, OWNER_ID));
+    }
+
+    //------------------------------------
+
+    // edge test 
+    //-----------------------------------
+    @Test
+    void updateTask_ShouldHandlePartialUpdates() {
+        UpdateTaskDTO partialUpdate = new UpdateTaskDTO();
+        partialUpdate.setTitle("Only Title Updated");
+        
+        when(taskRepository.findById(1L)).thenReturn(Optional.of(task));
+        when(taskRepository.save(any(Task.class))).thenReturn(task);
+        
+        TaskResponseDTO result = taskService.updateTask(1L, partialUpdate, OWNER_ID);
+        
+        assertEquals(partialUpdate.getTitle(), result.getTitle());
+        assertEquals(task.getDescription(), result.getDescription()); // Original value
+        assertEquals(task.getStatus(), result.getStatus()); // Original value
+    }
+
+    @Test
+    void createTask_ShouldHandleNullOptionalFields() {
+        createTaskDTO.setDescription(null);
+        createTaskDTO.setStatus(null);
+        
+        when(taskRepository.save(any(Task.class))).thenReturn(task);
+        
+        TaskResponseDTO result = taskService.createTask(createTaskDTO, OWNER_ID);
+        
+        assertNotNull(result);
+        assertNull(result.getDescription());
+        assertNull(result.getStatus());
+    }
 }
