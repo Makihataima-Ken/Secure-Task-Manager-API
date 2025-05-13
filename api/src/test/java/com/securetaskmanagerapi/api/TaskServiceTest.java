@@ -83,7 +83,7 @@ class TaskServiceTest {
         assertEquals(createTaskDTO.getTitle(), result.getTitle()); // Compare with DTO
         assertEquals(createTaskDTO.getDescription(), result.getDescription());
         assertEquals(createTaskDTO.getDueDate(), result.getDueDate());
-        // assertEquals(createTaskDTO.getStatus(), result.getStatus());
+        assertEquals(createTaskDTO.getStatus(), result.getStatus());
         verify(taskRepository, times(1)).save(any(Task.class));
     }
 

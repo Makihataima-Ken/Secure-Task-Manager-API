@@ -2,6 +2,7 @@ package com.securetaskmanagerapi.api.dto;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.securetaskmanagerapi.api.entity.Status;
 
 import jakarta.validation.constraints.FutureOrPresent;
@@ -27,5 +28,6 @@ public class CreateTaskDTO {
     private LocalDate dueDate;
 
     @NotNull
-    private Status status = Status.PENDING;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
+    private Status status;
 }

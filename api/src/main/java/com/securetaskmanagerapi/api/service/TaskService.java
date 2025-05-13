@@ -27,6 +27,7 @@ public class TaskService {
         task.setTitle(taskDTO.getTitle());
         task.setDescription(taskDTO.getDescription());
         task.setDueDate(taskDTO.getDueDate());
+        task.setStatus(taskDTO.getStatus());
         task.setOwnerId(ownerId);
         taskRepository.save(task);
         return new TaskResponseDTO(task);

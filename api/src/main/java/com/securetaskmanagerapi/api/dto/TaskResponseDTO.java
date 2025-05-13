@@ -2,6 +2,7 @@ package com.securetaskmanagerapi.api.dto;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.securetaskmanagerapi.api.entity.Status;
 import com.securetaskmanagerapi.api.entity.Task;
 
@@ -17,6 +18,7 @@ public class TaskResponseDTO {
     private String title;
     private String description;
     private LocalDate dueDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Status status;
 
     public TaskResponseDTO(Task task) {

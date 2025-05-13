@@ -2,6 +2,7 @@ package com.securetaskmanagerapi.api.dto;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.securetaskmanagerapi.api.entity.Status;
 
 import jakarta.validation.constraints.FutureOrPresent;
@@ -24,5 +25,6 @@ public class UpdateTaskDTO {
     @FutureOrPresent(message = "Due date must be in the present or future")
     private LocalDate dueDate;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING)
     private Status status;
 }
